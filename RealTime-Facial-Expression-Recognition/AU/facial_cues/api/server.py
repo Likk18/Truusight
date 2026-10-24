@@ -203,14 +203,14 @@ def camera_start():
     global pipeline, _worker
     if _worker is not None and _worker.is_alive():
         return {"status": "already_running", "camera_running": True}
-    if pipeline is None:
+    try:
         config = load_config(None)
         config.deception.enabled = True
         config.visualization.enabled = True
         pipeline = PipelineOrchestrator(config)
         pipeline.initialize()
-    else:
-        pipeline._is_running = True
+    except Exception as e:
+        return {"status": "error", "error": str(e), "camera_running": False}
     _worker = threading.Thread(target=_run_camera, name="facial-cues-camera", daemon=True)
     _worker.start()
     return {"status": "started", "camera_running": True}
